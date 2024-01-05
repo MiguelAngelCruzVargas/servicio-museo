@@ -9,14 +9,14 @@ ventana = Tk()
 ventana.geometry('560x500-10+5')
 ventana.config(bg='black')
 # ocultar la barra de titulo
-#ventana.overrideredirect(1) 
+ventana.overrideredirect(1) 
 
 # Crear un marco en la ventana para contener otros elementos
 frame = Frame(ventana, height=600, width=600, bg='black', relief='sunken')
 frame.grid(columnspan=2, row=0)
 
-# Crear un lienzo (canvas) dentro del marco para dibujar elementos gráficos
-canvas = Canvas(frame, bg='black', width=685, height=485, bd=0)
+# Crear un lienzo (canvas) dentro del marco para dibujar elementos gráficos (marco color blanco)
+canvas = Canvas(frame, bg='black', width=545, height=485, bd=1)
 canvas.grid(padx=5, pady=5)
 
 # Establecer el tiempo de inicio del programa
