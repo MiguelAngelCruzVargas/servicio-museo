@@ -4,3 +4,20 @@ comando para ejecutar un script defiendo cuantas veces
 for ($i=1; $i -le 5; $i++) {
 >>     python barra_test.py
   
+comando para convertir un script de python en .exe
+
+1.- pyinstaller --onefile tu_script.py
+
+2.-Generar un ejecutable sin una terminal visible (sin mostrar la consola):
+pyinstaller --onefile --icon=tu_icono.ico tu_script.py
+
+3.-Generar un ejecutable con un icono personalizado:
+pyinstaller --onefile --icon=tu_icono.ico tu_script.py
+
+4.-Generar un ejecutable sin incluir el archivo *.spec:
+pyinstaller --onefile --noconsole --exclude-module spec tu_script.py
+
+5.-Generar un ejecutable y especificar dependencias adicionales:
+pyinstaller --onefile --noconsole --add-data "archivos;." tu_script.py
+
+
