@@ -1,0 +1,6 @@
+comandos intereantes 
+
+comando para ejecutar un script defiendo cuantas veces
+for ($i=1; $i -le 5; $i++) {
+>>     python barra_test.py
+  
