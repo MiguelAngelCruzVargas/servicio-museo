@@ -41,6 +41,28 @@ class App:
 
     def process_image(self, file_path):
         input_image = Image.open(file_path)
+
+        # Redimensionar la imagen original antes de procesarla
+        input_image = input_image.resize((200, 200), Image.LANCZOS)
+        output_image = remove(input_image)
+
+        # Mostrar la previsualización después de procesar la imagen
+        self.show_images(input_image, ImageTk.PhotoImage(output_image))
+
+        # Habilitar el botón de guardar
+        self.save_button = ttk.Button(self.main_frame, text="Guardar", command=lambda: self.save_image(input_image), style='TButton')
+        self.save_button.grid(row=3, column=0, pady=10)
+
+    def show_images(self, input_image, output_image):
+        input_photo = ImageTk.PhotoImage(input_image)
+
+        self.input_label.config(image=input_photo)
+        self.input_label.image = input_photo
+
+        self.output_label.config(image=output_image)
+        self.output_label.image = output_image
+
+    def save_image(self, input_image):
         output_image = remove(input_image)
 
         output_path = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[("PNG files", "*.png"),
@@ -51,21 +73,8 @@ class App:
                                                                                        ("ICO files", "*.ico"),
                                                                                        ("WebP files", "*.webp")])
         if output_path:
+            self.output_format.set(output_path.split('.')[-1].upper())  # Actualizar el formato seleccionado
             output_image.save(output_path, format=self.output_format.get(), quality=self.output_quality.get())
-            self.show_images(input_image, output_image)
-
-    def show_images(self, input_image, output_image):
-        input_image.thumbnail((200, 200))
-        output_image.thumbnail((200, 200))
-
-        input_photo = ImageTk.PhotoImage(input_image)
-        output_photo = ImageTk.PhotoImage(output_image)
-
-        self.input_label.config(image=input_photo)
-        self.output_label.config(image=output_photo)
-
-        self.input_label.image = input_photo
-        self.output_label.image = output_photo
 
     def open_options_window(self):
         options_window = tk.Toplevel(self.root)
