@@ -28,6 +28,7 @@ def calculate_coordinates(nivel):
 def draw_progress_bar(inicio_x, inicio_y, final_x, final_y, gradiente):
     color = f'#{gradiente[0]:02X}{gradiente[1]:02X}{gradiente[2]:02X}'  # RGB color
     canvas.create_line(inicio_x, inicio_y, final_x, final_y, fill=color, width=60)
+    
 
 def draw_circles_and_text(centro_x, centro_y):
     centro_x -= 30  # Ajusta según sea necesario
@@ -68,7 +69,7 @@ def update_progress_bar():
         centro_y = (100 + 500) / 2 - 30
         draw_circles_and_text(centro_x, centro_y)
 
-        ventana.after(50, update_progress_bar)  # Aumenta el intervalo a 50 ms
+        ventana.after(60, update_progress_bar)  # Aumenta el intervalo a 50 ms
     else:
         nivel = 360
         canvas.create_oval(100, 100, 500, 500, fill="", outline='', width=5)
