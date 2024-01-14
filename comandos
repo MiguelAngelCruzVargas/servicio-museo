@@ -9,7 +9,7 @@ comando para convertir un script de python en .exe
 1.- pyinstaller --onefile tu_script.py
 
 2.-Generar un ejecutable sin una terminal visible (sin mostrar la consola):
-pyinstaller --onefile --icon=tu_icono.ico tu_script.py
+pyinstaller --onefile nombre_de_tu_script.py
 
 3.-Generar un ejecutable con un icono personalizado:
 pyinstaller --onefile --icon=tu_icono.ico tu_script.py
