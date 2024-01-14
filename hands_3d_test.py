@@ -1,3 +1,6 @@
+
+# en esta version las figuras se puede controlar 
+# la figura haciendo el uso de todos los dedos
 import numpy as np
 import open3d as o3d
 import time
