@@ -21,4 +21,8 @@ pyinstaller --onefile --noconsole --exclude-module spec tu_script.py
 5.-Generar un ejecutable y especificar dependencias adicionales:
 pyinstaller --onefile --noconsole --add-data "archivos;." tu_script.py
 
+6.- comando para ofuscar codigos:
+pyarmor-7 pack --xoptions="--advanced 1" --output dist multi.py
+
+
 
