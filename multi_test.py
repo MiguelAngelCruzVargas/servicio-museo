@@ -3,65 +3,125 @@ import numpy as np
 import time
 import subprocess
 from pynput.keyboard import Controller
+import cv2
+
 
 #Se crea un objeto Controller para controlar el teclado.
 keyboard = Controller()
 
+# Configuración de pantalla completa y optimización
 isfullscreen = "NO"
-makefullscreen = False
-if isfullscreen == "SI":
-    makefullscreen = True
+makefullscreen = isfullscreen == "SI"
 
 isoptimized = "SI"
-makeoptimize = False
-if isoptimized == "SI":
-    makeoptimize = True
+makeoptimize = isoptimized == "SI"
+
+# Documentación de variables de configuración
+"""
+Variables de configuración:
+- isfullscreen: Indica si la aplicación se ejecuta en modo de pantalla completa ("SI" o "NO").
+- makefullscreen: Booleano que representa si la aplicación debe ejecutarse en modo de pantalla completa.
+- isoptimized: Indica si se aplica la optimización ("SI" o "NO").
+- makeoptimize: Booleano que representa si se deben aplicar optimizaciones.
+"""
 
 #declaracion del numero de zonas
-totalpush = int(11)
+total_zones = 11
 touchcaps = []
 
-#zona de coordenadas de las figuras (ventanas)
-touchcaps.append({"cap1": (7, 14),     "cap2": (137, 110),  "com": ["a"], "last": 0, "detected": False, "timer": 0})
-touchcaps.append({"cap1": (178, 14),   "cap2": (306, 110),  "com": ["b"], "last": 0, "detected": False, "timer": 0})
-touchcaps.append({"cap1": (344, 14),   "cap2": (467, 110),  "com": ["c"], "last": 0, "detected": False, "timer" :0})
-touchcaps.append({"cap1": (507, 15),   "cap2": (630, 102),  "com": ["d"], "last": 0, "detected": False, "timer": 0})
-touchcaps.append({"cap1": (8, 135),    "cap2": (139, 234),  "com": ["e"], "last": 0, "detected": False, "timer": 0})
-touchcaps.append({"cap1": (244, 154),  "cap2": (409, 230),  "com": ["f"], "last": 0, "detected": False, "timer": 0})
-touchcaps.append({"cap1": (507, 133),  "cap2": (631, 209),  "com": ["g"], "last": 0, "detected": False, "timer": 0})
-touchcaps.append({"cap1": (10, 258),   "cap2": (140, 358),  "com": ["h"], "last": 0, "detected": False, "timer": 0})
-touchcaps.append({"cap1": (182, 258),  "cap2": (307, 358),  "com": ["i"], "last": 0, "detected": False, "timer": 0})
-touchcaps.append({"cap1": (348, 258), "cap2": (467, 358),  "com": ["j"], "last": 0, "detected": False, "timer": 0})
-touchcaps.append({"cap1": (507, 231), "cap2": (633, 358),  "com": ["k"], "last": 0, "detected": False, "timer": 0})
+zones_coordinates = [
+    {"cap1": (7, 14), "cap2": (137, 110), "com": ["a"]},
+    {"cap1": (178, 14), "cap2": (306, 110), "com": ["b"]},
+    {"cap1": (344, 14), "cap2": (467, 110), "com": ["c"]},
+    {"cap1": (507, 15), "cap2": (630, 102), "com": ["d"]},
+    {"cap1": (8, 135), "cap2": (139, 234), "com": ["e"]},
+    {"cap1": (244, 154), "cap2": (409, 230), "com": ["f"]},
+    {"cap1": (507, 133), "cap2": (631, 209), "com": ["g"]},
+    {"cap1": (10, 258), "cap2": (140, 358), "com": ["h"]},
+    {"cap1": (182, 258), "cap2": (307, 358), "com": ["i"]},
+    {"cap1": (348, 258), "cap2": (467, 358), "com": ["j"]},
+    {"cap1": (507, 231), "cap2": (633, 358), "com": ["k"]}
+]
 
-scripts_abiertos = set() #obtiene los nombres de los scripts que se abren
+# Inicialización de las zonas
+for i, zone_data in enumerate(zones_coordinates):
+    zone_data.update({"last": 0, "detected": False, "timer": 0})
+    touchcaps.append(zone_data)
+# Documentación
+
+"""
+Declaración del número de zonas y definición de las coordenadas de las figuras (ventanas).
+Variables:
+- total_zones: Número total de zonas.
+- touchcaps: Lista que almacenará información sobre cada zona.
+
+Estructura de cada zona (diccionario en touchcaps):
+- cap1: Coordenada del vértice superior izquierdo.
+- cap2: Coordenada del vértice inferior derecho.
+- com: Lista de comandos asociados a la zona.
+- last: Último índice utilizado en la lista de comandos.
+- detected: Indica si la mano ha sido detectada en la zona.
+- timer: Tiempo transcurrido desde la última detección.
+""" 
+
+# Lista de desarrolladores
+lista_desarrolladores = ["Dr. Gaspar.S.G","Miguel Angel C.V","Wlliam J.C.O"]
+
+#obtiene los nombres de los scripts que se abren
+scripts_abiertos = set() 
 
 # guarda los nosmbres de los scrips para llamarlos posteriomente
-script_names = {
-    
-    "a": "hands_3d_final1.py",
-    "b": "hands_3d_final2.py",
-    "c": "hands_3d_final3.py",
-    "d": "hands_3d_final4.py",
-    "e": "hands_3d_final5.py",
-    "f": "hands_3d_final6.py",
-    "g": "hands_3d_final7.py",
-    "h": "hands_3d_final8.py",
-    "i": "hands_3d_final9.py",
-    "j": "hands_3d_final10.py",
-    "k": "hands_3d_final1.py",
-    
-    }
+# base nombre de los script
+base_script_name = "hands_3d{}.py"
 
-barra = "contador_test.py"
-aviso = "contador_prueba.py"
+# Nombres de los scripts asociados a letras
+# Se utiliza un diccionario de comprensión para generar automáticamente los nombres de los scripts
+# desde 'a' hasta 'k', y luego se agrega 'k' con el mismo script que 'a'
+# Nombres de los scripts
+script_names = {chr(ord('a') + i): base_script_name.format(i + 1) for i in range(11)}
+
+# Agregar 'k' con el mismo script que 'a'
+script_names['k'] = base_script_name.format(11)
+
+# Documentación
+"""
+Nombres de los scripts asociados a letras:
+
+Variables:
+- base_script_name: La parte común del nombre de los scripts.
+- script_names: Diccionario que asocia letras ('a'-'k') con nombres de scripts correspondientes.
+
+Estructura del diccionario script_names:
+- Clave: Letra asociada al script ('a'-'k').
+- Valor: Nombre del script correspondiente.
+
+Ejemplo de script_names:
+{
+    "a": "hands _3d1.py",
+    "b": "hands _3d2.py",
+    ...
+    "k": "hands _3d1.py"  
+}
+"""
+barra = "barra_carga.py"
+
 
 # Variable para checar si el script externo ya está abierto
 script_abierto = False
+
+# Variable para almacenar el nombre del script actualmente ejecutándose
 script_actual = None
+
+# Variable que almacena el proceso del script externo (la instancia Popen)
 script_proceso = None  
-ultimo_tiempo_apertura = 0 # Variable para almacenar el último tiempo de apertura
+
+# Variable para almacenar el último tiempo en que se intentó abrir el script
+# Variable para almacenar el último tiempo de apertura
+ultimo_tiempo_apertura = 0 
+
+# Variable para almacenar el último tiempo de apertura exitosa del script
 ultimo_tiempo_apertura_exitosa = 0
+
 
 
 ################ segundo codigo ########################################
@@ -104,32 +164,35 @@ cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 360)
    interacción con las zonas de control 
    en el programa.
 """
-counter = 0 
-lastgestureX = 0
-lastgestureY = 0
-lastgestureZ = 0
-moveDelta = 30
-lastmoveX = 0
-lastmoveY = 0
-lastmoveZ = 0
-waitframe = True
-moveX = 0
-moveY = 0
-moveZ = 0
-newZ = True
-refZ = 0
-absZ = 0
-initialpose = True
-zoomcounter = 0
-#funcion para cerra la barra de progreso por si la mano se quita de 
-#las zonas
+counter = 0        # Contador de gestos o movimientos
+lastgestureX = 0   # Última posición X del gesto
+lastgestureY = 0   # Última posición Y del gesto
+lastgestureZ = 0   # Última posición Z del gesto
+moveDelta = 30     # Umbral de cambio para considerar un movimiento
+lastmoveX = 0      # Última posición X del movimiento
+lastmoveY = 0      # Última posición Y del movimiento
+lastmoveZ = 0      # Última posición Z del movimiento
+waitframe = True   # Indicador de espera de cuadro
+moveX = 0          # Posición X del movimiento actual
+moveY = 0          # Posición Y del movimiento actual
+moveZ = 0          # Posición Z del movimiento actual
+newZ = True        # Indicador de nueva posición Z
+refZ = 0           # Posición de referencia Z
+absZ = 0           # Valor absoluto de la posición Z
+initialpose = True # Indicador de la pose inicial
+zoomcounter = 0    # Contador de zoom
+
+
+"""
+    Cierra el script asociado a la barra de progreso si la mano se retira de ciertas zonas.
+    """
 def cerrar_contador():
     global script_abierto, script_actual, script_proceso, ultimo_tiempo_apertura
 
     try:
+         # Verifica si el script actual es el de la barra y está abierto
         if script_actual == barra and script_abierto:
-                cerrar_script_externo()
-                script_proceso = subprocess.Popen(["python", aviso])
+                cerrar_script_externo()  # Cierra el script actual
     except Exception as e:
         print("Error al cerrar el script del contador:", e)
 #funcion para calcular la distancia netre dos puntos
@@ -137,11 +200,18 @@ def calc_distance(p1, p2):
     return sqrt((p1[0]-p2[0])*2+(p1[1]-p2[1])*2)
 #funcion para 
 
+
+    """
+    Abre un script externo asociado a una letra, cerrando el script actual si es necesario.
+
+    Parameters:
+    - letra (str): La letra asociada al script que se va a abrir.
+    """
 def abrir_script_externo(letra):
     global script_abierto, script_actual, script_proceso, ultimo_tiempo_apertura
 
     try:
-        #checa si hay algun script abierto
+        # Cierra el script actual si es diferente del actual
         if script_actual :
             print(f"Ya hay un script abierto: {script_actual}")
             # en revision  esto se puso porque se cerraba y se abria el script actual
@@ -150,8 +220,8 @@ def abrir_script_externo(letra):
             if script_abierto != script_actual:
                 cerrar_script_externo()
                 
-            # Si ha pasado menos de 3 segundos desde la última apertura, no permite abrir otro script
-            tiempo_actual = time.time()
+            # Verifica si ha pasado menos de 3 segundos desde la última apertura
+            #tiempo_actual = time.time()
             if tiempo_actual - ultimo_tiempo_apertura < 3:
                 print("Debe esperar 3 segundos antes de abrir otro script.")
                 return
@@ -162,7 +232,9 @@ def abrir_script_externo(letra):
         if script_name == barra and script_name in scripts_abiertos:
               print(f"El script {barra} ya está abierto.")
               return
-          #llama al scripts con subsproceso
+        
+        
+        # Permite abrir otro script
         if script_name:
             script_proceso = subprocess.Popen(["python", script_name])
             scripts_abiertos.add(script_name)
@@ -170,10 +242,14 @@ def abrir_script_externo(letra):
             script_actual = script_name
         else:
                 print(f"No se encontró el script para la letra '{letra}'")
+
     except Exception as e:
         print("Error al abrir el script externo:", e)
 
-#funcion para cerrar el script actual 
+
+    """
+    Cierra el script externo actual si está abierto.
+    """
 def cerrar_script_externo():
     global script_abierto, script_actual, script_proceso
     try:
@@ -194,14 +270,11 @@ def cerrar_script_externo():
 hand_inside_region = False
 
 with mp_hands.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.5, max_num_hands=1) as hands:
-
     while cap.isOpened():
 
         ret, frame = cap.read()
 
         image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-        
 
         frameWidth = image.shape[1]
         frameHeight = image.shape[0]
@@ -223,19 +296,15 @@ with mp_hands.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.5, m
 
         if results.multi_handedness:
             totalHands = len(results.multi_handedness)
-
-            """""
             if totalHands == 2:
                 if results.multi_handedness[0].classification[0].label == results.multi_handedness[1].classification[0].label:
                     totalHands = 1
-                     """""
 
         if results.multi_hand_landmarks:
             if initialpose:
                 initialpose = False
-            #if len(results.multi_hand_landmarks) == 1:
+                
             hand = results.multi_hand_landmarks[0]
-
             if totalHands == 1:
                 for num, hand in enumerate(results.multi_hand_landmarks):
                     indexTip = results.multi_hand_landmarks[0].landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP]
@@ -247,9 +316,6 @@ with mp_hands.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.5, m
                     if indexTipXY and thumbTipXY is not None:
                         indexXY = (indexTipXY[0], indexTipXY[1])
                         thumbXY = (thumbTipXY[0], thumbTipXY[1])
-
-               # else:
-                       # print("Hay más de una mano presente. Selecciona solo una mano para el seguimiento.")
 #en este ciclo principal se agrego el temporizador para que el script 
 # sea llamado o se ejecute despues de mantener la mano por 5 segundos en la zona de gestos
                         for i, r in enumerate(touchcaps):
@@ -294,7 +360,7 @@ with mp_hands.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.5, m
                         mp_drawing.draw_landmarks(image, hand, mp_hands.HAND_CONNECTIONS,
                             mp_drawing.DrawingSpec(color=(121, 22, 76), thickness=2, circle_radius=4),
                             mp_drawing.DrawingSpec(color=(250, 44, 250), thickness=2, circle_radius=2))
-            """
+
             elif totalHands == 2:
                 handX = [0, 0]
                 handY = [0, 0]
@@ -338,10 +404,8 @@ with mp_hands.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.5, m
                         mp_drawing.draw_landmarks(image, hand, mp_hands.HAND_CONNECTIONS, 
                             mp_drawing.DrawingSpec(color=(121, 22, 76), thickness=2, circle_radius=4),
                             mp_drawing.DrawingSpec(color=(250, 44, 250), thickness=2, circle_radius=2)
-        
-                        
-                                                        )
-"""
+                        )
+
         else:
             if not initialpose:
                 initialpose = True
@@ -357,11 +421,14 @@ with mp_hands.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.5, m
         for r in touchcaps:
             cv2.rectangle(image, r["cap1"], r["cap2"], (255, 255, 255), 1)
 
+
+        credit_text = f"Desarrollado por: {', '.join(lista_desarrolladores)}"
+        cv2.putText(image, credit_text, (10, image.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 255, 255), 1, cv2.LINE_AA)
         if not makefullscreen:
             cv2.imshow('Hand Tracking', image)
-            #window.overrideredirect(1)  # Elimina los bordes y la barra de título
 
-
+          
+        # Salir del bucle si se presiona la tecla 'esc'
         if cv2.waitKey(1) & 0xFF == ord(' '):
             break
 #se cambio la condicion para que no se cierre el script
